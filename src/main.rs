@@ -30,23 +30,36 @@ fn apply_operation(pattern: Regex, mut expression: String, operation: &str) -> S
 }
 
 fn main() {
-    // Regex
-    let re_mult: Regex = Regex::new(r"(\d+)\s?\*\s?(\d+)").unwrap();
-    let re_div: Regex = Regex::new(r"(\d+)\s?\/\s?(\d+)").unwrap();
-    let re_add: Regex = Regex::new(r"(\d+)\s?\+\s?(\d+)").unwrap();
-    let re_less: Regex = Regex::new(r"(\d+)\s?\-\s?(\d+)").unwrap();
-
     // User input
     let mut user_expression: String = String::new();
     println!("Insert your math expression:");
     std::io::stdin().read_line(&mut user_expression).unwrap();
 
+    let operation_herarchy = ["*", "/", "+", "-"];
+
     // Apply operations
-    user_expression = apply_operation(re_mult, user_expression, "*");
-    user_expression = apply_operation(re_div, user_expression, "/");
-    user_expression = apply_operation(re_add, user_expression, "+");
-    user_expression = apply_operation(re_less, user_expression, "-");
+    for operation in operation_herarchy {
+        let regex_to_use = get_regex_for_operation(operation).unwrap();
+        user_expression = apply_operation(regex_to_use, user_expression, operation);
+    }
 
     // Show results
     println!("Result: {}", user_expression);
+}
+
+fn get_regex_for_operation(operation: &str) -> Option<Regex> {
+    // Compile regex patterns once
+    let re_mult = Regex::new(r"(\d+)\s?\*\s?(\d+)").unwrap();
+    let re_div = Regex::new(r"(\d+)\s?\/\s?(\d+)").unwrap();
+    let re_add = Regex::new(r"(\d+)\s?\+\s?(\d+)").unwrap();
+    let re_less = Regex::new(r"(\d+)\s?\-\s?(\d+)").unwrap();
+
+    // Return the appropriate regex based on the operation
+    match operation {
+        "+" => Some(re_add),
+        "-" => Some(re_less),
+        "*" => Some(re_mult),
+        "/" => Some(re_div),
+        _ => None, // Return None for invalid operations
+    }
 }
